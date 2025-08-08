@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { TimelineItem } from '../data/timelineItems';
 import { TimelineItemComponent } from './TimelineItem';
 import { formatDate } from '../utils/timelineUtils';
@@ -5,13 +6,30 @@ import { formatDate } from '../utils/timelineUtils';
 interface TimelineProps {
   lanes: TimelineItem[][];
   dateRange: { start: Date; end: Date };
+  zoomLevel: number;
+  onWheel: (event: WheelEvent) => void;
 }
 
 const LANE_HEIGHT = 56;
 const LANE_MARGIN = 8; 
 
-export function Timeline({ lanes, dateRange }: TimelineProps) {
+export function Timeline({ lanes, dateRange, zoomLevel, onWheel }: TimelineProps) {
+  const timelineRef = useRef<HTMLDivElement>(null);
   const totalHeight = lanes.length * (LANE_HEIGHT + LANE_MARGIN);
+
+  useEffect(() => {
+    const element = timelineRef.current;
+    if (!element) return;
+
+    const handleWheelEvent = (event: WheelEvent) => {
+      onWheel(event);
+    };
+
+    element.addEventListener('wheel', handleWheelEvent, { passive: false });
+    return () => {
+      element.removeEventListener('wheel', handleWheelEvent);
+    };
+  }, [onWheel]);
 
   const generateDateLabels = () => {
     const labels = [];
@@ -33,7 +51,24 @@ export function Timeline({ lanes, dateRange }: TimelineProps) {
   const totalDays = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24));
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+    <div 
+      ref={timelineRef}
+      className="w-full bg-white rounded-lg shadow-lg border border-gray-200 relative"
+      style={{ 
+        overflow: 'auto',
+        cursor: zoomLevel !== 1 ? 'grab' : 'default',
+        maxHeight: '80vh'
+      }}
+    >
+      <div 
+        className="transition-transform duration-300 ease-out"
+        style={{ 
+          transform: `scale(${zoomLevel})`, 
+          transformOrigin: 'top left',
+          minWidth: zoomLevel < 1 ? `${100 / zoomLevel}%` : '100%',
+          minHeight: zoomLevel < 1 ? `${100 / zoomLevel}%` : 'auto'
+        }}
+      >
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Project Timeline</h2>
         <div className="relative h-12 border-b-2 border-gray-300">
@@ -125,6 +160,7 @@ export function Timeline({ lanes, dateRange }: TimelineProps) {
             <span className="font-medium">Total Duration:</span> {totalDays} days
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

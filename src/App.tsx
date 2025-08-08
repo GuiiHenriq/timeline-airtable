@@ -1,11 +1,13 @@
 import './App.css';
 import { Timeline } from './components/Timeline';
 import { TimelineStats } from './components/TimelineStats';
+import { ZoomControls } from './components/ZoomControls';
+import { ZoomIndicator } from './components/ZoomIndicator';
 import { useTimeline } from './hooks/useTimeline';
 import timelineItems from './data/timelineItems';
 
 function App() {
-  const { lanes, dateRange } = useTimeline(timelineItems);
+  const { lanes, dateRange, zoomLevel, zoomIn, zoomOut, resetZoom, handleWheel, isZooming } = useTimeline(timelineItems);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -16,8 +18,27 @@ function App() {
           </h1>
         </header>
         
-        <TimelineStats lanes={lanes} dateRange={dateRange} />
-        <Timeline lanes={lanes} dateRange={dateRange} />
+        <div className="mb-6">
+          <TimelineStats lanes={lanes} dateRange={dateRange} />
+        </div>
+        
+        <div className="mb-6 flex justify-end">
+          <ZoomControls 
+            zoomLevel={zoomLevel}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onReset={resetZoom}
+          />
+        </div>
+        
+        <Timeline 
+          lanes={lanes} 
+          dateRange={dateRange} 
+          zoomLevel={zoomLevel}
+          onWheel={handleWheel}
+        />
+        
+        <ZoomIndicator zoomLevel={zoomLevel} show={isZooming} />
       </div>
     </div>
   );

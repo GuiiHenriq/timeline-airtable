@@ -1,16 +1,24 @@
 import { useState, useMemo } from 'react';
 import { TimelineItem } from '../data/timelineItems';
 import { assignLanes } from '../utils/assignLanes';
+import { useZoom } from './useZoom';
 
 export interface UseTimelineReturn {
   items: TimelineItem[];
   lanes: TimelineItem[][];
   dateRange: { start: Date; end: Date };
   updateItem: (id: number, updates: Partial<TimelineItem>) => void;
+  zoomLevel: number;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoom: () => void;
+  handleWheel: (event: WheelEvent) => void;
+  isZooming: boolean;
 }
 
 export function useTimeline(initialItems: TimelineItem[]): UseTimelineReturn {
   const [items, setItems] = useState<TimelineItem[]>(initialItems);
+  const { zoomLevel, zoomIn, zoomOut, setZoomLevel, handleWheel, isZooming } = useZoom();
 
   const lanes = useMemo(() => assignLanes(items), [items]);
 
@@ -34,10 +42,20 @@ export function useTimeline(initialItems: TimelineItem[]): UseTimelineReturn {
     );
   };
 
+  const resetZoom = () => {
+    setZoomLevel(1);
+  };
+
   return {
     items,
     lanes,
     dateRange,
     updateItem,
+    zoomLevel,
+    zoomIn,
+    zoomOut,
+    resetZoom,
+    handleWheel,
+    isZooming,
   };
 }
