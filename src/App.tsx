@@ -13,7 +13,7 @@ function App() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-4xl text-center font-bold text-gray-900 mb-2">
+          <h1 className="text-5xl text-center font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-lg mb-2">
             Timeline
           </h1>
         </header>
